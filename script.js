@@ -1,5 +1,10 @@
 const btnEl=document.getElementById('btn')
+const appEl=document.getElementById('app')
 
+getNotes().forEach((note)=>{
+    const noteEl=createNoteEl(note.id, note.content)
+    appEl.insertBefore(noteEl,btnEl)
+})
 
 function createNoteEl(id, content){
     //console.log(id, content);
@@ -18,28 +23,47 @@ function createNoteEl(id, content){
     element.addEventListener('input', ()=>{
         updateNote(id, element.value)
     })
+
+    return element
 }
 
 
-function deleteNote(){
-
+function deleteNote(id, element){
+    const notes=getNotes().filter((note)=>note.id!=id)
+    saveNoteToLS(notes)
+    appEl.removeChild(element)
 }
 
 
-function updateNote(){
-
+function updateNote(id, content){
+    const notes=getNotes()
+    const target=notes.filter((note)=>note.id==id)[0]
+    target.content=content
+    saveNoteToLS(notes)
 }
 
 
 function addNote(){
+    const notes=getNotes()
     const noteObj={
         id: Math.floor(Math.random()*100000),
         content: ""
     }
     //console.log(noteObj);
     const noteEl=createNoteEl(noteObj.id, noteObj.content)
-    
+    appEl.insertBefore(noteEl, btnEl)
+
+    notes.push(noteObj)
+
+    saveNoteToLS(notes)
 }
 
+function saveNoteToLS(notes){
+    localStorage.setItem("note-app", JSON.stringify(notes))
+}
+
+function getNotes(){
+    return JSON.parse(localStorage.getItem("note-app") || "[]")
+}
 
 btnEl.addEventListener('click', addNote)
